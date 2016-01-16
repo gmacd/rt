@@ -40,7 +40,6 @@ func main() {
 	}
 	window.MakeContextCurrent()
 
-	// Initialize Glow
 	if err := gl.Init(); err != nil {
 		panic(err)
 	}
@@ -48,7 +47,6 @@ func main() {
 	version := gl.GoStr(gl.GetString(gl.VERSION))
 	fmt.Println("OpenGL version", version)
 
-	// Configure the vertex and fragment shaders
 	program, err := newProgram(vertexShader, fragmentShader)
 	if err != nil {
 		panic(err)
@@ -63,10 +61,8 @@ func main() {
 	textureUniform := gl.GetUniformLocation(program, gl.Str("tex\x00"))
 	gl.Uniform1i(textureUniform, 0)
 
-	// Load the texture
 	texture := createScreenTexture()
 
-	// Configure the vertex data
 	var vao uint32
 	gl.GenVertexArrays(1, &vao)
 	gl.BindVertexArray(vao)
@@ -94,11 +90,8 @@ func main() {
 	gl.EnableVertexAttribArray(texCoordAttrib)
 	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, false, 5*4, gl.PtrOffset(3*4))
 
-	// Configure global settings
 	gl.Enable(gl.DEPTH_TEST)
 	gl.ClearColor(1.0, 1.0, 1.0, 1.0)
-
-	//previousTime := glfw.GetTime()
 
 	for !window.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -196,9 +189,10 @@ func createScreenTexture() uint32 {
 func updateScreenTexture(texture uint32) {
 	pixels := make([]uint8, 4*renderbufferWidth*renderbufferHeight)
 	for i := 0; i < 4*renderbufferWidth*renderbufferHeight; i += 4 {
-		pixels[i] = uint8(rand.Intn(255))
-		pixels[i+1] = uint8(rand.Intn(255))
-		pixels[i+2] = uint8(rand.Intn(255))
+		yellow := uint8(rand.Intn(128)) + 127
+		pixels[i] = yellow
+		pixels[i+1] = yellow
+		pixels[i+2] = 0
 		pixels[i+3] = 255
 	}
 
