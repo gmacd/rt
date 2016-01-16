@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	_ "image/png"
+	"math/rand"
 	"runtime"
 	"strings"
 
@@ -62,13 +63,8 @@ func main() {
 	textureUniform := gl.GetUniformLocation(program, gl.Str("tex\x00"))
 	gl.Uniform1i(textureUniform, 0)
 
-	//gl.BindFragDataLocation(program, 0, gl.Str("outputColor\x00"))
-
 	// Load the texture
-	texture, err := newTexture("square.png")
-	if err != nil {
-		panic(err)
-	}
+	texture := createScreenTexture()
 
 	// Configure the vertex data
 	var vao uint32
@@ -107,11 +103,9 @@ func main() {
 	for !window.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		// Render textured quad
 		gl.UseProgram(program)
 		gl.BindVertexArray(vao)
-		gl.ActiveTexture(gl.TEXTURE0)
-		gl.BindTexture(gl.TEXTURE_2D, texture)
+		updateScreenTexture(texture)
 		gl.DrawArrays(gl.TRIANGLES, 0, 6)
 
 		window.SwapBuffers()
@@ -176,31 +170,7 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 	return shader, nil
 }
 
-func newTexture(file string) (uint32, error) {
-	/*imgFile, err := os.Open(file)
-	if err != nil {
-		return 0, err
-	}
-	img, _, err := image.Decode(imgFile)
-	if err != nil {
-		return 0, err
-	}
-
-	rgba := image.NewRGBA(img.Bounds())
-	if rgba.Stride != rgba.Rect.Size().X*4 {
-		return 0, fmt.Errorf("unsupported stride")
-	}
-	draw.Draw(rgba, rgba.Bounds(), img, image.Point{0, 0}, draw.Src)*/
-
-	//var pixels [4 * renderbufferWidth * renderbufferHeight]byte
-	pixels := make([]uint8, 4*renderbufferWidth*renderbufferHeight)
-	for i := 0; i < 4*renderbufferWidth*renderbufferHeight; i += 4 {
-		pixels[i] = 255
-		pixels[i+1] = 255
-		pixels[i+2] = 0
-		pixels[i+3] = 255
-	}
-
+func createScreenTexture() uint32 {
 	var texture uint32
 	gl.GenTextures(1, &texture)
 	gl.ActiveTexture(gl.TEXTURE0)
@@ -213,17 +183,37 @@ func newTexture(file string) (uint32, error) {
 		gl.TEXTURE_2D,
 		0,
 		gl.RGBA,
-		//int32(rgba.Rect.Size().X),
-		//int32(rgba.Rect.Size().Y),
 		renderbufferWidth,
 		renderbufferHeight,
 		0,
 		gl.RGBA,
 		gl.UNSIGNED_BYTE,
-		gl.Ptr(pixels))
-	//gl.Ptr(rgba.Pix))
+		nil)
 
-	return texture, nil
+	return texture
+}
+
+func updateScreenTexture(texture uint32) {
+	pixels := make([]uint8, 4*renderbufferWidth*renderbufferHeight)
+	for i := 0; i < 4*renderbufferWidth*renderbufferHeight; i += 4 {
+		pixels[i] = uint8(rand.Intn(255))
+		pixels[i+1] = uint8(rand.Intn(255))
+		pixels[i+2] = uint8(rand.Intn(255))
+		pixels[i+3] = 255
+	}
+
+	gl.ActiveTexture(gl.TEXTURE0)
+	gl.BindTexture(gl.TEXTURE_2D, texture)
+	gl.TexSubImage2D(
+		gl.TEXTURE_2D,
+		0,
+		0,
+		0,
+		renderbufferWidth,
+		renderbufferHeight,
+		gl.RGBA,
+		gl.UNSIGNED_BYTE,
+		gl.Ptr(pixels))
 }
 
 var vertexShader = `
