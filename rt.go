@@ -47,7 +47,7 @@ func main() {
 	version := gl.GoStr(gl.GetString(gl.VERSION))
 	fmt.Println("OpenGL version", version)
 
-	program, err := newProgram(vertexShader, fragmentShader)
+	program, err := createScreenShader()
 	if err != nil {
 		panic(err)
 	}
@@ -104,6 +104,36 @@ func main() {
 		window.SwapBuffers()
 		glfw.PollEvents()
 	}
+}
+
+func createScreenShader() (uint32, error) {
+	var vertexShader = `
+#version 330
+
+uniform mat4 projection;
+in vec3 vert;
+in vec2 vertTexCoord;
+out vec2 fragTexCoord;
+
+void main() {
+    fragTexCoord = vertTexCoord;
+    gl_Position = projection * vec4(vert, 1);
+}
+` + "\x00"
+
+	var fragmentShader = `
+#version 330
+
+uniform sampler2D tex;
+in vec2 fragTexCoord;
+out vec4 outputColor;
+
+void main() {
+    outputColor = texture(tex, fragTexCoord);
+}
+` + "\x00"
+
+	return newProgram(vertexShader, fragmentShader)
 }
 
 func newProgram(vertexShaderSource, fragmentShaderSource string) (uint32, error) {
@@ -175,25 +205,26 @@ func createScreenTexture() uint32 {
 	gl.TexImage2D(
 		gl.TEXTURE_2D,
 		0,
-		gl.RGBA,
+		gl.RGBA32F,
 		renderbufferWidth,
 		renderbufferHeight,
 		0,
 		gl.RGBA,
-		gl.UNSIGNED_BYTE,
+		gl.FLOAT,
 		nil)
 
 	return texture
 }
 
 func updateScreenTexture(texture uint32) {
-	pixels := make([]uint8, 4*renderbufferWidth*renderbufferHeight)
+	// Yellow noise
+	pixels := make([]float32, 4*renderbufferWidth*renderbufferHeight)
 	for i := 0; i < 4*renderbufferWidth*renderbufferHeight; i += 4 {
-		yellow := uint8(rand.Intn(128)) + 127
+		yellow := rand.Float32()/2.0 + 0.5
 		pixels[i] = yellow
 		pixels[i+1] = yellow
 		pixels[i+2] = 0
-		pixels[i+3] = 255
+		pixels[i+3] = 1.0
 	}
 
 	gl.ActiveTexture(gl.TEXTURE0)
@@ -206,36 +237,6 @@ func updateScreenTexture(texture uint32) {
 		renderbufferWidth,
 		renderbufferHeight,
 		gl.RGBA,
-		gl.UNSIGNED_BYTE,
+		gl.FLOAT,
 		gl.Ptr(pixels))
 }
-
-var vertexShader = `
-#version 330
-
-uniform mat4 projection;
-
-in vec3 vert;
-in vec2 vertTexCoord;
-
-out vec2 fragTexCoord;
-
-void main() {
-    fragTexCoord = vertTexCoord;
-    gl_Position = projection * vec4(vert, 1);
-}
-` + "\x00"
-
-var fragmentShader = `
-#version 330
-
-uniform sampler2D tex;
-
-in vec2 fragTexCoord;
-
-out vec4 outputColor;
-
-void main() {
-    outputColor = texture(tex, fragTexCoord);
-}
-` + "\x00"
