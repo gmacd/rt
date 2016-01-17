@@ -85,7 +85,7 @@ func (glr *GlRenderer) Render(frame *Frame) {
 func (glr *GlRenderer) Window() *glfw.Window { return glr.window }
 
 func (glr *GlRenderer) initSystem() {
-	// TODO Call once goroutine created
+	// Lock goroutine to main thread - required for GL
 	runtime.LockOSThread()
 
 	var err error
