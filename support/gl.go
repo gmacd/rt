@@ -2,7 +2,6 @@ package support
 
 import (
 	"fmt"
-	"math/rand"
 	"runtime"
 	"strings"
 
@@ -18,36 +17,69 @@ type GlRenderer struct {
 	program uint32
 	vao     uint32
 	texture uint32
+
+	framesToRender chan *Frame
+	freeFrames     chan *Frame
+}
+
+type Frame struct {
+	ShouldStop    bool // 2-way message - checked on both ends
+	Pixels        []float32
+	Width, Height int
 }
 
 func NewGlRenderer(width, height int) *GlRenderer {
-	glr := &GlRenderer{width, height, nil, 0, 0, 0}
+	glr := &GlRenderer{
+		width, height, nil, 0, 0, 0,
+		make(chan *Frame, 1),
+		make(chan *Frame, 1)}
+
 	return glr
 }
 
-func (glr *GlRenderer) Init() {
+func (glr *GlRenderer) Start() {
+	go func() {
+		glr.initSystem()
+		glr.initScreen()
 
-	glr.initSystem()
-	glr.initScreen()
+		// Prepare 2 frames to double buffer
+		for i := 0; i < 2; i++ {
+			glr.freeFrames <- &Frame{
+				glr.window.ShouldClose(),
+				make([]float32, 4*glr.width*glr.height),
+				glr.width, glr.height}
+		}
+
+		// Loop until stop is requested
+		for nextFrame := range glr.framesToRender {
+			if nextFrame.ShouldStop {
+				break
+			}
+
+			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+			gl.UseProgram(glr.program)
+			gl.BindVertexArray(glr.vao)
+
+			updateScreenTexture(glr.texture, nextFrame.Pixels, glr.width, glr.height)
+			gl.DrawArrays(gl.TRIANGLES, 0, 6)
+
+			glr.window.SwapBuffers()
+			glfw.PollEvents()
+
+			// Consider frame rendered, so push back to be reused
+			nextFrame.ShouldStop = glr.window.ShouldClose()
+			glr.freeFrames <- nextFrame
+		}
+	}()
 }
 
-func (glr *GlRenderer) Shutdown() {
-	glfw.Terminate()
+func (glr *GlRenderer) NextFrameChan() chan *Frame {
+	return glr.freeFrames
 }
 
-func (glr *GlRenderer) Loop() {
-	for !glr.window.ShouldClose() {
-		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
-		gl.UseProgram(glr.program)
-		gl.BindVertexArray(glr.vao)
-
-		updateScreenTexture(glr.texture, glr.width, glr.height)
-		gl.DrawArrays(gl.TRIANGLES, 0, 6)
-
-		glr.window.SwapBuffers()
-		glfw.PollEvents()
-	}
+func (glr *GlRenderer) Render(frame *Frame) {
+	glr.framesToRender <- frame
 }
 
 func (glr *GlRenderer) Window() *glfw.Window { return glr.window }
@@ -244,17 +276,7 @@ func createScreenTexture(width, height int) uint32 {
 	return texture
 }
 
-func updateScreenTexture(texture uint32, width, height int) {
-	// Yellow noise
-	pixels := make([]float32, 4*width*height)
-	for i := 0; i < 4*width*height; i += 4 {
-		yellow := rand.Float32()/2.0 + 0.5
-		pixels[i] = yellow
-		pixels[i+1] = yellow
-		pixels[i+2] = 0
-		pixels[i+3] = 1.0
-	}
-
+func updateScreenTexture(texture uint32, pixels []float32, width, height int) {
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, texture)
 	gl.TexSubImage2D(
