@@ -31,8 +31,8 @@ type Frame struct {
 func NewGlRenderer(width, height int) *GlRenderer {
 	glr := &GlRenderer{
 		width, height, nil, 0, 0, 0,
-		make(chan *Frame, 1),
-		make(chan *Frame, 1)}
+		make(chan *Frame, 2),
+		make(chan *Frame, 2)}
 
 	return glr
 }
