@@ -10,18 +10,6 @@ import (
 func main() {
 	fmt.Println("=== rt ===")
 
-	// Test frame output
-	imageRenderer := support.NewImageRenderer(200, 200)
-	pixels := imageRenderer.Pixels
-	for i := 0; i < len(pixels); i += 4 {
-		yellow := rand.Float32()/2.0 + 0.5
-		pixels[i] = yellow
-		pixels[i+1] = yellow
-		pixels[i+2] = 0
-		pixels[i+3] = 1.0
-	}
-	imageRenderer.RenderToFile("out.jpg")
-
 	renderer := support.NewGlRenderer(200, 200)
 	renderer.Start()
 
@@ -31,12 +19,12 @@ func main() {
 		}
 
 		pixels := frame.Pixels
-		for i := 0; i < len(pixels); i += 4 {
+		for i := 0; i < len(pixels); i++ {
 			yellow := rand.Float32()/2.0 + 0.5
-			pixels[i] = yellow
-			pixels[i+1] = yellow
-			pixels[i+2] = 0
-			pixels[i+3] = 1.0
+			pixels[i].R = yellow
+			pixels[i].G = yellow
+			pixels[i].B = 0
+			pixels[i].A = 1.0
 		}
 
 		renderer.Render(frame)

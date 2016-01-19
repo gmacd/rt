@@ -5,6 +5,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/gmacd/rt/maths"
 	"github.com/go-gl/gl/all-core/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/go-gl/mathgl/mgl32"
@@ -24,7 +25,7 @@ type GlRenderer struct {
 
 type Frame struct {
 	ShouldStop    bool // 2-way message - checked on both ends
-	Pixels        []float32
+	Pixels        []maths.Rgba
 	Width, Height int
 }
 
@@ -46,7 +47,7 @@ func (glr *GlRenderer) Start() {
 		for i := 0; i < 2; i++ {
 			glr.freeFrames <- &Frame{
 				glr.window.ShouldClose(),
-				make([]float32, 4*glr.width*glr.height),
+				make([]maths.Rgba, glr.width*glr.height),
 				glr.width, glr.height}
 		}
 
@@ -276,7 +277,7 @@ func createScreenTexture(width, height int) uint32 {
 	return texture
 }
 
-func updateScreenTexture(texture uint32, pixels []float32, width, height int) {
+func updateScreenTexture(texture uint32, pixels []maths.Rgba, width, height int) {
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, texture)
 	gl.TexSubImage2D(
