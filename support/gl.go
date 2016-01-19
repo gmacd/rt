@@ -10,7 +10,13 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
-type GlRenderer struct {
+type Renderer interface {
+	Start()
+	NextFrameChan()
+	Render(frame *Frame)
+}
+
+type glRenderer struct {
 	width, height int
 
 	window  *glfw.Window
@@ -28,8 +34,8 @@ type Frame struct {
 	Width, Height int
 }
 
-func NewGlRenderer(width, height int) *GlRenderer {
-	glr := &GlRenderer{
+func NewGlRenderer(width, height int) *glRenderer {
+	glr := &glRenderer{
 		width, height, nil, 0, 0, 0,
 		make(chan *Frame, 2),
 		make(chan *Frame, 2)}
@@ -37,7 +43,7 @@ func NewGlRenderer(width, height int) *GlRenderer {
 	return glr
 }
 
-func (glr *GlRenderer) Start() {
+func (glr *glRenderer) Start() {
 	go func() {
 		glr.initSystem()
 		glr.initScreen()
@@ -74,17 +80,17 @@ func (glr *GlRenderer) Start() {
 	}()
 }
 
-func (glr *GlRenderer) NextFrameChan() chan *Frame {
+func (glr *glRenderer) NextFrameChan() chan *Frame {
 	return glr.freeFrames
 }
 
-func (glr *GlRenderer) Render(frame *Frame) {
+func (glr *glRenderer) Render(frame *Frame) {
 	glr.framesToRender <- frame
 }
 
-func (glr *GlRenderer) Window() *glfw.Window { return glr.window }
+func (glr *glRenderer) Window() *glfw.Window { return glr.window }
 
-func (glr *GlRenderer) initSystem() {
+func (glr *glRenderer) initSystem() {
 	// Lock goroutine to main thread - required for GL
 	runtime.LockOSThread()
 
@@ -112,7 +118,7 @@ func (glr *GlRenderer) initSystem() {
 	fmt.Println("OpenGL version", version)
 }
 
-func (glr *GlRenderer) initScreen() {
+func (glr *glRenderer) initScreen() {
 	var err error
 	glr.program, err = createScreenShader()
 	if err != nil {
