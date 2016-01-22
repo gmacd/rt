@@ -30,3 +30,5 @@ type Ray struct {
 	Origin Pos3
 	Dir    Vec3
 }
+
+func NewRay(o Pos3, dir Vec3) Ray { return Ray{o, dir} }

@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 
+	. "github.com/gmacd/rt/maths"
+	"github.com/gmacd/rt/scene"
 	"github.com/gmacd/rt/support"
 	"github.com/gmacd/rt/tracer"
 )
@@ -12,6 +14,8 @@ func main() {
 
 	renderer := support.NewGlRenderer(200, 200)
 	renderer.Start()
+	
+	s := scene.CreateCornellBoxOfSpheres()
 
 	rayTracer := tracer.NewRayTracer()
 
@@ -20,7 +24,7 @@ func main() {
 			break
 		}
 
-		rayTracer.Render(frame)
+		rayTracer.Render(s, frame)
 		renderer.Render(frame)
 	}
 }
