@@ -36,7 +36,7 @@ func TestMulIdent(t *testing.T) {
 	m1 := NewMatIdent()
 	m2 := NewMatIdent()
 	m := m1.Mul(&m2)
-	test.Equal(t, m, m1, "m is not identity")		
+	test.Equal(t, m1, m, "m is not identity")		
 }
 
 var matResult Mat
