@@ -47,7 +47,7 @@ func NewMatPerspective(fov, near, far float32) Mat {
 	return scaleMat.Mul(&perspMat)
 }
 
-func (m1 *Mat) Mul(m2 *Mat) Mat {
+func (m1 *Mat) Mul(m2 *Mat) Mat { 
 	m := Mat{}
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 4; j++ {
