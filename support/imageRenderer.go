@@ -46,7 +46,7 @@ func (ir *ImageRenderer) RenderToFile(filename string) {
 	case ".png":
 		err = png.Encode(imgWriter, img)
 	case ".jpg", ".jpeg":
-		err = jpeg.Encode(imgWriter, img, &jpeg.Options{jpeg.DefaultQuality})
+		err = jpeg.Encode(imgWriter, img, &jpeg.Options{Quality: jpeg.DefaultQuality})
 	}
 
 	if err != nil {
