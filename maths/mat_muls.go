@@ -2,8 +2,8 @@ package maths
 
 func Muls(s float32, m, mout *Mat)
 
-// Temporarily here for benchmarking
-func MulsGo(s float32, m, mout *Mat) {
+// Go fallback
+func muls(s float32, m, mout *Mat) {
 	mout[0][0] = s*m[0][0]
 	mout[0][1] = s*m[0][1]
 	mout[0][2] = s*m[0][2]
