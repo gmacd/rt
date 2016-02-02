@@ -1,8 +1,10 @@
 #include "textflag.h"
 
-// func Muls(s float32, m, mout *Mat)
+// func (m *Mat) Muls(s float32) Mat
 TEXT ·Muls(SB),NOSPLIT,$0
-	MOVQ	m+8(FP), BX		// BX = &m[0][0]
+	JMP ·muls(SB)
+	
+	/*MOVQ	m+8(FP), BX		// BX = &m[0][0]
 	
 	MOVAPS	(BX), X0		// X0 = m[0][0]
 	MOVAPS	16(BX), X1		// X1 = m[1][0]
@@ -24,4 +26,4 @@ TEXT ·Muls(SB),NOSPLIT,$0
 	MOVAPS	X2, 32(BX)		// mout[2][0] = X2
 	MOVAPS	X3, 48(BX)		// mout[3][0] = X3
 
-	RET
+	RET*/

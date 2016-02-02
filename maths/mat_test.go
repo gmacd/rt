@@ -9,7 +9,7 @@ import (
 
 func TestMatSizeCorrect(t *testing.T) {
 	m := NewMatIdent()
-	test.Equal(t, 64, int(unsafe.Sizeof(*m)), "Mat wrong size")
+	test.Equal(t, 64, int(unsafe.Sizeof(m)), "Mat wrong size")
 }
 
 func TestNewMatIdent(t *testing.T) {
@@ -19,8 +19,8 @@ func TestNewMatIdent(t *testing.T) {
 		0, 1, 0, 0,
 		0, 0, 1, 0,
 		0, 0, 0, 1)
-	if *m1 != *m2 {
-		t.Errorf("Expected identity, but got: %v", *m2)
+	if m1 != m2 {
+		t.Errorf("Expected identity, but got: %v", m2)
 	}
 }
 
@@ -31,37 +31,36 @@ func TestNewMatScale(t *testing.T) {
 		0, 3, 0, 0,
 		0, 0, -4, 0,
 		0, 0, 0, 1)
-	if *m1 != *expected {
-		t.Errorf("Expected %v, but got: %v", expected, *m1)
+	if m1 != expected {
+		t.Errorf("Expected %v, but got: %v", expected, m1)
 	}
 }
 
 func TestMulIdent(t *testing.T) {
 	i := NewMatIdent()
-	m := i.Mul(i)
-	if *m != *i {
-		t.Errorf("Expected %v, but got: %v", *i, *m)
+	m := i.Mul(&i)
+	if m != i {
+		t.Errorf("Expected %v, but got: %v", i, m)
 	}
 }
 
 func TestMuls(t *testing.T) {
 	i := NewMatIdent()
-	m := &Mat{}
-	Muls(5, i, m)
+	m := i.Muls(5)
 	expected := NewMat(
 		5, 0, 0, 0,
 		0, 5, 0, 0,
 		0, 0, 5, 0,
 		0, 0, 0, 5)
 	
-	if *m != *expected {
-		t.Errorf("Expected %v, but found %v.", *expected, *m)
+	if m != expected {
+		t.Errorf("Expected %v, but found %v.", expected, m)
 	}
 }
 
 // Benchmarks
 
-var matResult *Mat
+var matResult Mat
 
 func BenchmarkMatMul(b *testing.B) {
 	m1 := NewMat(
@@ -73,9 +72,9 @@ func BenchmarkMatMul(b *testing.B) {
 		
 	b.ResetTimer()
 	
-	var mr *Mat
+	var mr Mat
 	for i := 0; i < b.N; i++ {
-		mr = m1.Mul(m2)
+		mr = m1.Mul(&m2)
 	}
 	matResult = mr
 }
@@ -87,9 +86,9 @@ func BenchmarkMatMuls(b *testing.B) {
 		
 	b.ResetTimer()
 	
-	mr := &Mat{}
+	var mr Mat
 	for i := 0; i < b.N; i++ {
-		Muls(float32(i), m1, mr)
+		mr = m1.Muls(float32(i))
 	}
 	matResult = mr
 }
