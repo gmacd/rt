@@ -28,3 +28,12 @@ func (rt *RayTracer) Render(scene *scene.Scene, frame *support.Frame) {
 		pixels[i].A = 1.0
 	}
 }
+
+
+/*type CameraRayGenerator struct {
+
+}
+
+func NewCameraRayTracer() CameraRayGenerator {
+	return
+}*/

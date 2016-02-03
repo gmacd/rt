@@ -12,6 +12,13 @@ type Vec3 struct {
 
 func NewVec3(x, y, z float32) Vec3 { return Vec3{X: x, Y: y, Z: z} }
 
+func NewVecFrom2Pos3(from, to Pos3) Vec3 {
+	return Vec3 {
+		X: to.X - from.X,
+		Y: to.Y - from.Y,
+		Z: to.Z - from.Z } 
+}
+
 func (v Vec3) Addf(f float32) Vec3 { return NewVec3(v.X+f, v.Y+f, v.Z+f) }
 func (v Vec3) Subf(f float32) Vec3 { return NewVec3(v.X-f, v.Y-f, v.Z-f) }
 func (v Vec3) Mulf(f float32) Vec3 { return NewVec3(v.X*f, v.Y*f, v.Z*f) }

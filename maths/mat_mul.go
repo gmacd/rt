@@ -1,6 +1,6 @@
 package maths
 
-func (m1 *Mat) Mul(m2 *Mat) Mat {
+func (m1 *Mat) MulMat(m2 *Mat) Mat {
 	return Mat{
 		{m1[0][0]*m2[0][0] + m1[1][0]*m2[0][1] + m1[2][0]*m2[0][2] + m1[3][0]*m2[0][3],
 		 m1[0][1]*m2[0][0] + m1[1][1]*m2[0][1] + m1[2][1]*m2[0][2] + m1[3][1]*m2[0][3],
@@ -24,10 +24,24 @@ func (m1 *Mat) Mul(m2 *Mat) Mat {
 	}
 }
 
-func (m *Mat) Muls(s float32) Mat {
+func (m *Mat) Mulf32(s float32) Mat {
 	return Mat{
 		{s * m[0][0], s * m[0][1], s * m[0][2], s * m[0][3]},
 		{s * m[1][0], s * m[1][1], s * m[1][2], s * m[1][3]},
 		{s * m[2][0], s * m[2][1], s * m[2][2], s * m[2][3]},
 		{s * m[3][0], s * m[3][1], s * m[3][2], s * m[3][3]}}
+}
+
+func (m *Mat) MulVec3(v Vec3) Vec3 {
+	return NewVec3(
+		v.X*m[0][0] + v.Y*m[0][1] + v.Z*m[0][2],
+		v.X*m[1][0] + v.Y*m[1][1] + v.Z*m[1][2],
+		v.X*m[2][0] + v.Y*m[2][1] + v.Z*m[2][2])
+}
+
+func (m *Mat) MulPos3(p Pos3) Pos3 {
+	return NewPos3(
+		p.X*m[0][0] + p.Y*m[0][1] + p.Z*m[0][2],
+		p.X*m[1][0] + p.Y*m[1][1] + p.Z*m[1][2],
+		p.X*m[2][0] + p.Y*m[2][1] + p.Z*m[2][2])
 }

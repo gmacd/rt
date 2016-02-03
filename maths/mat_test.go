@@ -38,7 +38,7 @@ func TestNewMatScale(t *testing.T) {
 
 func TestMulIdent(t *testing.T) {
 	i := NewMatIdent()
-	m := i.Mul(&i)
+	m := i.MulMat(&i)
 	if m != i {
 		t.Errorf("Expected %v, but got: %v", i, m)
 	}
@@ -46,15 +46,33 @@ func TestMulIdent(t *testing.T) {
 
 func TestMuls(t *testing.T) {
 	i := NewMatIdent()
-	m := i.Muls(5)
+	mr := i.Mulf32(5)
 	expected := NewMat(
 		5, 0, 0, 0,
 		0, 5, 0, 0,
 		0, 0, 5, 0,
 		0, 0, 0, 5)
 	
-	if m != expected {
-		t.Errorf("Expected %v, but found %v.", expected, m)
+	if mr != expected {
+		t.Errorf("Expected %v, but found %v.", expected, mr)
+	}
+}
+
+func TestMulv(t *testing.T) {
+	m := NewMatIdent()
+	v := NewVec3(10, 20, 30)
+
+	vr := m.MulVec3(v)
+	expected := NewVec3(10, 20, 30)
+	if vr != expected {
+		t.Errorf("Expected %v, but found %v.", expected, vr)
+	}
+
+	m = NewMatScale(2, 3, 4)
+	vr = m.MulVec3(v)
+	expected = NewVec3(20, 60, 120)
+	if vr != expected {
+		t.Errorf("Expected %v, but found %v.", expected, vr)
 	}
 }
 
@@ -74,7 +92,7 @@ func BenchmarkMatMul(b *testing.B) {
 	
 	var mr Mat
 	for i := 0; i < b.N; i++ {
-		mr = m1.Mul(&m2)
+		mr = m1.MulMat(&m2)
 	}
 	matResult = mr
 }
@@ -88,7 +106,7 @@ func BenchmarkMatMuls(b *testing.B) {
 	
 	var mr Mat
 	for i := 0; i < b.N; i++ {
-		mr = m1.Muls(float32(i))
+		mr = m1.Mulf32(float32(i))
 	}
 	matResult = mr
 }
