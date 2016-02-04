@@ -1,6 +1,7 @@
 package tracer
 
 import (
+	"math"
 	"math/rand"
 
 	. "github.com/gmacd/rt/maths"
@@ -9,31 +10,84 @@ import (
 )
 
 type RayTracer struct {
+	rayGen cameraRayGenerator
 }
 
 func NewRayTracer() *RayTracer {
-	return &RayTracer{}
+	return &RayTracer {
+		newCameraRayTracer() }
 }
 
 func (rt *RayTracer) Render(scene *scene.Scene, frame *support.Frame) {
 	pixels := frame.Pixels
+	w, h := frame.Width, frame.Height
 
-	for i := 0; i < len(pixels); i++ {
-		//r := NewRay(scene.Camera().Pos, 
-	
-		yellow := rand.Float32()/2.0 + 0.5
-		pixels[i].R = yellow
-		pixels[i].G = yellow
-		pixels[i].B = 0
-		pixels[i].A = 1.0
+	rt.rayGen.prepareNewFrame(scene.Camera(), w, h)
+
+	pixelIdx := 0
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			//r := rt.rayGen.GeneratePrimaryRay(float32(x), float32(y))
+		
+			yellow := rand.Float32()/2.0 + 0.5
+			pixels[pixelIdx].R = yellow
+			pixels[pixelIdx].G = yellow
+			pixels[pixelIdx].B = 0
+			pixels[pixelIdx].A = 1.0
+
+			pixelIdx++
+		}
 	}
 }
 
 
-/*type CameraRayGenerator struct {
+// Generates primary rays.  Caching lots of data used when ray-casting
+// for a single frame.
+type cameraRayGenerator struct {
+	cam *scene.Camera
+	camToWorld Mat
+	cameraOriginWorld Pos3
 
+	aspectRatio float32
+	fovFactor float32
+	w, h float32
 }
 
-func NewCameraRayTracer() CameraRayGenerator {
-	return
-}*/
+func newCameraRayTracer() cameraRayGenerator {
+	return cameraRayGenerator {}
+}
+
+func (c *cameraRayGenerator) prepareNewFrame(
+	cam *scene.Camera,
+	w, h int) {
+
+	c.cam = cam
+	c.w = float32(w)
+	c.h = float32(h)
+
+	// TODO Build transform
+	c.camToWorld = NewMatIdent()
+
+	if (c.w >= c.h) {
+		c.aspectRatio = c.w / c.h
+	} else {
+		c.aspectRatio = c.h / c.w
+	}
+
+	c.fovFactor = float32(math.Tan(float64(DegToRad(2.0 * cam.FovDeg))))
+
+	c.cameraOriginWorld = c.camToWorld.MulPos3(Pos3{})
+}
+
+func (c *cameraRayGenerator) GeneratePrimaryRay(x, y float32) Ray {
+	// Work out pixel positions in camera space
+	camPixelPos := NewPos3(
+		((2.0 * ((x + 0.5) / c.w)) - 1) * c.fovFactor * c.aspectRatio,
+		(1 - (2.0 * ((y + 0.5) / c.h))) * c.fovFactor,
+		-1)
+
+	// Work out ray in world space, going from origin through camPix
+	rayDestWorld := c.camToWorld.MulPos3(camPixelPos)
+	rayDirWorld := NewVecFrom2Pos3(c.cameraOriginWorld, rayDestWorld)
+	return NewRay(c.cameraOriginWorld, rayDirWorld)
+}

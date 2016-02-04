@@ -13,6 +13,7 @@ func CreateCornellBoxOfSpheres() *Scene {
 			NewPos3(50, 52, 295.6),
 			NewVec3(0, -0.042612, -1).Norm(),
 			60.0))
+
 	s.AddSpheres(
 		NewSphere(NewPos3(0, 0, 0), 1e5), // Left
 		NewSphere(NewPos3(0, 0, 0), 1e5), // Right
@@ -20,6 +21,7 @@ func CreateCornellBoxOfSpheres() *Scene {
 		NewSphere(NewPos3(0, 0, 0), 1e5), // Front
 		NewSphere(NewPos3(0, 0, 0), 1e5), // Bottom
 		NewSphere(NewPos3(0, 0, 0), 1e5)) // Top
+	
 	//s.AddLight(
 
 	return s

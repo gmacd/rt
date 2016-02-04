@@ -46,3 +46,7 @@ func NewMatPerspective(fov, near, far float32) Mat {
 	result := scaleMat.MulMat(&perspMat)
 	return result
 }
+
+/*func NewMatFromDir(dir, up Vec3) Mat {
+
+}*/
