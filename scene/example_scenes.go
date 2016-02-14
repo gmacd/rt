@@ -10,8 +10,8 @@ func CreateCornellBoxOfSpheres() *Scene {
 	// Based on http://www.kevinbeason.com/smallpt/
 	s.AddCamera(
 		NewCamera(
-			NewPos3(50, 52, 295.6),
-			NewVec3(0, -0.042612, -1).Norm(),
+			NewPos3(0, 0, 0),
+			NewVec3(0, 0, -1).Norm(),
 			60.0))
 
 	s.AddSpheres(
