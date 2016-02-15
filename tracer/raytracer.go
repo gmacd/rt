@@ -2,7 +2,6 @@ package tracer
 
 import (
 	"math"
-	"math/rand"
 
 	. "github.com/gmacd/rt/maths"
 	"github.com/gmacd/rt/scene"
@@ -23,13 +22,23 @@ func (rt *RayTracer) Render(scene *scene.Scene, frame *support.Frame) {
 	w, h := frame.Width, frame.Height
 
 	rt.rayGen.prepareNewFrame(scene.Camera(), w, h)
+	
+	tri := Triangle{
+		NewPos3(0, 1, 1),
+		NewPos3(-1, -1, 1),
+		NewPos3(1, -1, 1)}
 
 	pixelIdx := 0
 	for y := 0; y < h; y++ {
 		for x := 0; x < w; x++ {
-			//r := rt.rayGen.GeneratePrimaryRay(float32(x), float32(y))
-		
-			yellow := rand.Float32()/2.0 + 0.5
+			r := rt.rayGen.GeneratePrimaryRay(float32(x), float32(y))
+			
+			hit, _ := IntersectRayTriangle(&r, &tri, math.MaxFloat32)
+			
+			var yellow float32 = 0
+			if hit {
+				yellow = 1
+			}
 			pixels[pixelIdx].R = yellow
 			pixels[pixelIdx].G = yellow
 			pixels[pixelIdx].B = 0
